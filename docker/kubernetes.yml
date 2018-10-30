@@ -1,0 +1,250 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: cloud-config-server
+  labels:
+    run: cloud-config-server
+spec:
+  ports:
+  - port: 8888
+    protocol: TCP
+  selector:
+    run: cloud-config-server
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloud-config-server
+spec:
+  selector:
+    matchLabels:
+      run: cloud-config-server
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: cloud-config-server
+    spec:
+      containers:
+      - name: cloud-config-server
+        image: "${your-docker-hub-prefix}/cloud-config-server"
+        ports:
+        - containerPort: 8888
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8888
+          initialDelaySeconds: 20
+          periodSeconds: 20
+        env:
+        - name: EUREKA_SERVER_NAME
+          value: "cloud-eureka-server"
+        - name: CONFIG_SERVER_NAME
+          value: "cloud-config-server"
+      imagePullSecrets:
+        - name: ${your-k8s-registry-key}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: cloud-gateway
+  labels:
+    run: cloud-gateway
+spec:
+  ports:
+  - port: 9999
+    protocol: TCP
+  selector:
+    run: cloud-gateway
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloud-gateway
+spec:
+  selector:
+    matchLabels:
+      run: cloud-gateway
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: cloud-gateway
+    spec:
+      containers:
+      - name: cloud-gateway
+        image: "${your-docker-hub-prefix}/cloud-gateway"
+        ports:
+        - containerPort: 9999
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 9999
+          initialDelaySeconds: 20
+          periodSeconds: 20
+        env:
+        - name: EUREKA_SERVER_NAME
+          value: "cloud-eureka-server"
+        - name: CONFIG_SERVER_NAME
+          value: "cloud-config-server"
+      imagePullSecrets:
+        - name: ${your-k8s-registry-key}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: cloud-eureka-server
+  labels:
+    run: cloud-eureka-server
+spec:
+  ports:
+  - port: 8761
+    protocol: TCP
+  selector:
+    run: cloud-eureka-server
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloud-eureka-server
+spec:
+  selector:
+    matchLabels:
+      run: cloud-eureka-server
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: cloud-eureka-server
+    spec:
+      containers:
+      - name: cloud-eureka-server
+        image: "${your-docker-hub-prefix}/cloud-eureka-server"
+        ports:
+        - containerPort: 8761
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8761
+          initialDelaySeconds: 20
+          periodSeconds: 20
+        env:
+        - name: EUREKA_SERVER_NAME
+          value: "cloud-eureka-server"
+        - name: CONFIG_SERVER_NAME
+          value: "cloud-config-server"
+      imagePullSecrets:
+        - name: ${your-k8s-registry-key}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: scapp-1
+  labels:
+    run: scapp-1
+spec:
+  ports:
+  - port: 1025
+    protocol: TCP
+  selector:
+    run: scapp-1
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scapp-1
+spec:
+  selector:
+    matchLabels:
+      run: scapp-1
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: scapp-1
+    spec:
+      containers:
+      - name: scapp-1
+        image: "${your-docker-hub-prefix}/scapp-1"
+        ports:
+        - containerPort: 1025
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 1025
+          initialDelaySeconds: 20
+          periodSeconds: 20
+        env:
+        - name: EUREKA_SERVER_NAME
+          value: "cloud-eureka-server"
+        - name: CONFIG_SERVER_NAME
+          value: "cloud-config-server"
+      imagePullSecrets:
+        - name: ${your-k8s-registry-key}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: scapp3
+  labels:
+    run: scapp3
+spec:
+  ports:
+  - port: 1026
+    protocol: TCP
+  selector:
+    run: scapp3
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scapp3
+spec:
+  selector:
+    matchLabels:
+      run: scapp3
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: scapp3
+    spec:
+      containers:
+      - name: scapp3
+        image: "${your-docker-hub-prefix}/scapp3"
+        ports:
+        - containerPort: 1026
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 1026
+          initialDelaySeconds: 20
+          periodSeconds: 20
+        env:
+        - name: EUREKA_SERVER_NAME
+          value: "cloud-eureka-server"
+        - name: CONFIG_SERVER_NAME
+          value: "cloud-config-server"
+      imagePullSecrets:
+        - name: ${your-k8s-registry-key}
+
+---
+
